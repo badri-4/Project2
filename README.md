@@ -27,9 +27,9 @@ Follow the steps below to set up and run the code on any system. These instructi
 1. Open **Git Bash** (or any command line terminal that supports Git) on your computer.
 2. Navigate to the directory where the project is located. For example:
    ```bash
-   cd ~/music/project1
+   cd ~/videos/project2
    ```
-   In this example, we are assuming that the project is located in the `music/project1` directory. Replace this path with the actual path where you have downloaded the repository.
+   In this example, we are assuming that the project is located in the `videos/project2` directory. Replace this path with the actual path where you have downloaded the repository.
 
 ### Step 3: Install the Required Dependencies
 
@@ -55,7 +55,7 @@ Follow the steps below to set up and run the code on any system. These instructi
 1. Now that the dependencies are installed and the project is set up, you can run the tests to ensure everything is working correctly.
 2. Execute the following command to run the test file:
    ```bash
-   pytest -s elasticnet/tests/test_ElasticNetModel.py
+   pytest -s GradientBoosting/tests/test_GradientBoosting.py
    ```
    - The `-s` flag ensures that any `print` statements in the test file are displayed in the terminal.
-   - `pytest` will run the test cases defined in `test_ElasticNetModel.py` to verify the functionality of your ElasticNet implementation.
+   - `pytest` will run the test cases defined in `test_GradientBoosting.py` to verify the functionality of your ElasticNet implementation.
