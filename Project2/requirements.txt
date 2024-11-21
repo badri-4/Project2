@@ -1,5 +1,0 @@
-numpy
-csv
-pytest
-ipython
-matplotlib
