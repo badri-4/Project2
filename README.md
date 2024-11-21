@@ -58,4 +58,4 @@ Follow the steps below to set up and run the code on any system. These instructi
    pytest -s GradientBoosting/tests/test_GradientBoosting.py
    ```
    - The `-s` flag ensures that any `print` statements in the test file are displayed in the terminal.
-   - `pytest` will run the test cases defined in `test_GradientBoosting.py` to verify the functionality of your ElasticNet implementation.
+   - `pytest` will run the test cases defined in `test_GradientBoosting.py` to verify the functionality of your GradientBoosting implementation.
