@@ -1,4 +1,7 @@
 numpy
+pandas
+seaborn
+itertools
 csv
 pytest
 ipython
