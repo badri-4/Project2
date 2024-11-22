@@ -1,118 +1,130 @@
-import csv
 import numpy as np
 import pandas as pd
-from GradientBoosting.models.GradientBoosting import GradientBoosting
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+from GradientBoosting.models.GradientBoosting import GradientBoosting
+from GradientBoosting.models.grid_search import grid_search
+from GradientBoosting.models.Check import check_null, XandY
 
 
 def test_predict():
-    # Initialize GradientBoosting model
-    # n_estimators: Number of trees in the ensemble
-    # learning_rate: Step size for updating residuals
-    # max_depth: Maximum depth of each decision tree
-    model = GradientBoosting(n_estimators=100, learning_rate=0.1, max_depth=3)
+    """
+    Test the GradientBoosting model with a dataset, evaluate its performance, and visualize results.
+    """
 
-    # Load data from CSV file
-    # csv_file_path: Path to the dataset
-    csv_file_path = "GradientBoosting/tests/small_test.csv"
-    df = pd.read_csv(csv_file_path)  # Load data into a pandas DataFrame
+    #! If you are going to use "pytest", enable this block
+    # file_path = "GradientBoosting/tests/small_test.csv"
+    # df = pd.read_csv(file_path)
+    # target = 'y'
 
-    # Separating features (X) and target variable (y)
-    # X contains all columns except 'y', which is the target
-    X = df.drop(columns=['y'])
-    y = df['y']
+    #! Comment it out if you are using "pytest"
+    file_path = input("Please enter the path to your dataset file: ")
 
-    # Handling categorical columns in X
-    # Identifies categorical columns and applies OneHotEncoding
-    categorical_cols = X.select_dtypes(include=['object', 'category']).columns
-    if len(categorical_cols) > 0:
-        encoder = OneHotEncoder(sparse=False, drop='first')  # OneHotEncoder avoids collinearity
-        # Encode categorical columns and add to DataFrame
-        X_encoded = pd.DataFrame(encoder.fit_transform(X[categorical_cols]), index=X.index)
-        X_encoded.columns = encoder.get_feature_names_out(categorical_cols)
-        X = X.drop(columns=categorical_cols)  # Drop original categorical columns
-        X = pd.concat([X, X_encoded], axis=1)  # Add encoded columns to X
+    try:
+        if file_path.endswith('.csv'):
+            df = pd.read_csv(file_path)
+        else:
+            print("Unsupported file format. Please provide a CSV, Excel, JSON, or Parquet file.")
+            return
+    except FileNotFoundError:
+        print("File not found. Please check the path and try again.")
+        return
 
-    # Handling categorical target variable y
-    # Converts target variable y into numeric using LabelEncoder if categorical
-    if y.dtype == 'object':
-        label_encoder = LabelEncoder()
-        y = label_encoder.fit_transform(y)
+    print("\n" + "=" * 40)
+    print("Dataset Preview:")
+    print("=" * 40)
+    print(df.head())
 
-    # Convert y to NumPy array to avoid index mismatches
-    y = np.array(y)
+    #! Uncomment this block if using "pytest"
+    # target = 'y'
 
-    # Split data into training and testing sets (80-20 split)
-    # Training set is 80%, Testing set is 20%
-    X_train, X_test, y_train, y_test = train_test_split(X.values, y, test_size=0.20, random_state=42)
+    #! Comment out this block if using "pytest"
+    target = input("Enter the target column name: ")
 
-    # Fit the GradientBoosting model on training data
-    # Model learns the relationship between X_train and y_train
-    results = model.fit(X_train, y_train)
+    # Check and handle null values
+    check_null(df)
 
-    # Predict using the fitted model on the test set
-    preds = results.predict(X_test)
+    # Split data into features (X) and target (Y)
+    X, Y = XandY(df, target)
+
+    # Split data into training and testing sets
+    np.random.seed(42)
+    shuffled_indices = np.random.permutation(X.shape[0])
+    train_size = int(0.8 * len(shuffled_indices))
+    train_indices, test_indices = shuffled_indices[:train_size], shuffled_indices[train_size:]
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = Y[train_indices], Y[test_indices]
+
+    # Define hyperparameters for grid search
+    param_grid = {
+        'n_estimators': [50, 100, 150],
+        'learning_rate': [0.05, 0.1, 0.2],
+        'max_depth': [3, 5, 7]
+    }
+
+    # Perform grid search to find the best hyperparameters
+    grid_results = grid_search(X_train, y_train, param_grid)
+    best_params = grid_results['best_params']
+
+    print("\n" + "=" * 40)
+    print("Best Parameters from Grid Search")
+    print("=" * 40)
+    print(f"Number of Estimators: {best_params['n_estimators']}")
+    print(f"Learning Rate: {best_params['learning_rate']}")
+    print(f"Maximum Depth: {best_params['max_depth']}")
+    print(f"Best MSE: {grid_results['best_score']:.4f}")
+    print("=" * 40)
+
+    # Initialize the model with the best parameters
+    final_model = GradientBoosting(
+        n_estimators=best_params['n_estimators'],
+        learning_rate=best_params['learning_rate'],
+        max_depth=best_params['max_depth']
+    )
+
+    # Train the final model
+    final_model.fit(X_train, y_train)
+    final_predictions = final_model.predict(X_test)
 
     # Calculate evaluation metrics
-    # Mean Squared Error (MSE): Measures the average squared difference between predictions and actual values
-    mse = mean_squared_error(y_test, preds)
-    # R-squared (R²): Proportion of variance in the dependent variable explained by the model
-    r2 = r2_score(y_test, preds)
+    mse = np.mean((y_test - final_predictions) ** 2)
+    rmse = np.sqrt(mse)
+    r2 = 1 - (np.sum((y_test - final_predictions) ** 2) / np.sum((y_test - np.mean(y_test)) ** 2))
 
-    # Print evaluation metrics
-    print(f"Mean Squared Error (MSE): {mse}")
-    print(f"R-squared (R²): {r2}")
+    print("\n" + "=" * 40)
+    print("Final Model Evaluation")
+    print("=" * 40)
+    print(f"Mean Squared Error (MSE): {mse:.4f}")
+    print(f"Root Mean Squared Error (RMSE): {rmse:.4f}")
+    print(f"R² Score: {r2:.4f}")
+    print("=" * 40)
 
-    # **1. Residual Plot**
-    # Residual = Predicted - Actual
-    # Visualizes residuals to assess model bias
-    residuals = preds - y_test
-    plt.scatter(y_test, residuals)
-    plt.axhline(y=0, color='r', linestyle='--')  # Reference line at residual=0
-    plt.xlabel("True Values")
-    plt.ylabel("Residuals")
-    plt.title("Residual Plot")
+    # Visualization 1: Density Plot of Actual vs Predicted Values
+    plt.figure(figsize=(8, 6))
+    sns.kdeplot(y_test, color='blue', fill=True, label='Actual Values')
+    sns.kdeplot(final_predictions, color='blue', fill=True, label='Predicted Values')
+    plt.title('Density Plot of Actual vs Predicted Values')
+    plt.xlabel('Values')
+    plt.ylabel('Density')
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
-    # **2. Predicted vs. True Values**
-    # Visualizes how well predictions align with actual values
-    plt.scatter(y_test, preds)
-    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='r', linestyle='--')  # Ideal fit line
-    plt.xlabel("True Values")
-    plt.ylabel("Predicted Values")
-    plt.title("True vs. Predicted Values")
+    # Visualization 2: Prediction Error Plot
+    plt.figure(figsize=(8, 6))
+    plt.scatter(y_test, final_predictions, color='green', label='Predicted Values', alpha=0.6)
+    plt.plot(
+        [min(y_test), max(y_test)], [min(y_test), max(y_test)],
+        color='red', linestyle='--', label='Perfect Prediction'
+    )
+    plt.xlabel('Actual Values')
+    plt.ylabel('Predicted Values')
+    plt.title('Prediction Error Plot')
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
-    # **3. Learning Curve**
-    # Visualizes training and testing errors as the number of trees increases
-    train_errors = []
-    test_errors = []
-    for i, tree in enumerate(model.trees):
-        # Calculate predictions for training data using the first i+1 trees
-        partial_preds_train = np.sum([tree.predict(X_train) for tree in model.trees[:i+1]], axis=0)
-        train_errors.append(mean_squared_error(y_train, partial_preds_train))
 
-        # Calculate predictions for testing data using the first i+1 trees
-        partial_preds_test = np.sum([tree.predict(X_test) for tree in model.trees[:i+1]], axis=0)
-        test_errors.append(mean_squared_error(y_test, partial_preds_test))
-
-    # Plot the learning curve
-    plt.plot(train_errors, label='Training Error')
-    plt.plot(test_errors, label='Testing Error')
-    plt.xlabel("Number of Trees")
-    plt.ylabel("Mean Squared Error")
-    plt.title("Learning Curve")
-    plt.legend()  # Add a legend to differentiate training and testing errors
-    plt.show()
-
-    # Dummy assertion to validate test structure
-    # Ensures that predictions are returned as a NumPy array
-    assert isinstance(preds, np.ndarray), "Prediction is not an array"
-
-
-# Run the test function if executed directly
 if __name__ == "__main__":
     test_predict()
