@@ -69,11 +69,6 @@ After running the test command, the script will prompt you to provide necessary 
      ```
      Please enter the path to your dataset file:
      ```
-   - Enter the full path to the dataset file you want to use. Ensure the dataset is in one of the supported formats:  
-     - `.csv`  
-     - `.xlsx`  
-     - `.json`  
-     - `.parquet`  
 
 2. **Target Column Name**:  
    - After entering the dataset file path, the script will display:  
