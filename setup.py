@@ -11,7 +11,6 @@ setup(
         'matplotlib',
         'pandas',
         'seaborn',
-        'ipython',
-        'itertools'
+        'ipython'
     ],
 )
