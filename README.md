@@ -77,3 +77,17 @@ After running the test command, the script will prompt you to provide necessary 
      ```
    - Enter the name of the target column (e.g., `y`) that you wish to use as the dependent variable for training the model.
 
+
+### **Overview**
+
+This project implements a Gradient Boosting model for regression tasks. Gradient Boosting is an ensemble learning method that builds a sequence of weak learners, typically decision trees, where each new learner focuses on correcting the residual errors of the previous ones. It is a powerful and flexible technique for regression problems, known for its ability to handle complex datasets and achieve high predictive accuracy.
+
+### **Key Features**
+
+- **Iterative Residual Correction**: The model improves predictions iteratively by minimizing the residual errors from previous models.
+- **Decision Tree Base Learners**: Utilizes decision trees as weak learners, which are combined to form a strong predictive model.
+- **Learning Rate Control**: Incorporates a learning rate to manage the contribution of each tree and prevent overfitting.
+- **Hyperparameter Optimization**: Supports grid search to tune key hyperparameters such as the number of estimators, learning rate, and maximum tree depth for optimal performance.
+- **Robustness and Flexibility**: Handles complex data structures, making it well-suited for various regression tasks, even with non-linear relationships.  
+
+
