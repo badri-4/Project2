@@ -59,3 +59,27 @@ Follow the steps below to set up and run the code on any system. These instructi
    ```
    - The `-s` flag ensures that any `print` statements in the test file are displayed in the terminal.
    - `pytest` will run the test cases defined in `test_GradientBoosting.py` to verify the functionality of your GradientBoosting implementation.
+
+### **Step 6: Interactive Input During Testing**
+
+After running the test command, the script will prompt you to provide necessary inputs for testing the Gradient Boosting model:
+
+1. **Dataset File Path**:  
+   - You will see the following prompt in the terminal:  
+     ```
+     Please enter the path to your dataset file:
+     ```
+   - Enter the full path to the dataset file you want to use. Ensure the dataset is in one of the supported formats:  
+     - `.csv`  
+     - `.xlsx`  
+     - `.json`  
+     - `.parquet`  
+
+2. **Target Column Name**:  
+   - After entering the dataset file path, the script will display:  
+     ```
+     Enter the target column name:
+     ```
+   - Enter the name of the target column (e.g., `y`) that you wish to use as the dependent variable for training the model.
+
+**Note**: Make sure to provide accurate paths and column names to avoid errors during execution.
