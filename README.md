@@ -77,4 +77,3 @@ After running the test command, the script will prompt you to provide necessary 
      ```
    - Enter the name of the target column (e.g., `y`) that you wish to use as the dependent variable for training the model.
 
-**Note**: Make sure to provide accurate paths and column names to avoid errors during execution.
