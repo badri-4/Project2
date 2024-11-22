@@ -8,6 +8,10 @@ setup(
         'numpy',
         'scikit-learn',
         'pytest',
-        'matplotlib'
+        'matplotlib',
+        'pandas',
+        'seaborn',
+        'ipython',
+        'itertools'
     ],
 )
