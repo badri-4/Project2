@@ -1,7 +1,6 @@
 numpy
 pandas
 seaborn
-csv
 pytest
 ipython
 matplotlib
